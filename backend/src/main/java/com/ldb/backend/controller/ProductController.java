@@ -42,16 +42,22 @@ public class ProductController {
 
     // UPDATE an existing product
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody Product product) {
-        Optional<Product> updatedProduct = productService.updateProduct(productId, product);
-        return updatedProduct.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody Product updatedProduct) {
+        Product updated = productService.updateProduct(productId, updatedProduct);
+
+        if (updated != null) {
+            // Product was updated successfully
+            return ResponseEntity.ok(updated);
+        } else {
+            // Product with the specified ID doesn't exist
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // DELETE a product by ID
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-        if (productService.deleteProduct(productId)) { // needs to refactor ProductService.deleteProduct to return boolean
+        if (productService.deleteProduct(productId)) { 
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

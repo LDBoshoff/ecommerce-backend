@@ -25,7 +25,37 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+    public Product updateProduct(Long productId, Product updatedProduct) {
+        // Check if the product with the given ID exists in the database
+        Product existingProduct = productRepository.findById(productId).orElse(null);
+
+        if (existingProduct != null) {
+            // Product with the specified ID exists, so update it directly
+            existingProduct.setName(updatedProduct.getName());
+            existingProduct.setDescription(updatedProduct.getDescription());
+            existingProduct.setPrice(updatedProduct.getPrice());
+            existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+
+            // Save the updated product to the database
+            return productRepository.save(existingProduct);
+        }
+
+        // Product with the given ID doesn't exist, return null
+        return null;
+    }
+
+    public boolean deleteProduct(Long id) {
+        // Attempt to delete the product by its ID
+        if (productRepository.existsById(id)) {
+            try {
+                productRepository.deleteById(id);
+                return true; // Deletion was successful
+            } catch (Exception e) {
+                // Handle any exception that might occur during deletion (e.g., database errors)
+                return false; // Deletion failed
+            }
+        }
+        return false; // Product with the given ID doesn't exist
+
     }
 }
