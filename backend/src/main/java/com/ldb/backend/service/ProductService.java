@@ -1,6 +1,7 @@
 package com.ldb.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import com.ldb.backend.model.Product;
 import com.ldb.backend.repository.ProductRepository;
@@ -46,17 +47,12 @@ public class ProductService {
     }
 
     public boolean deleteProduct(Long id) {
-        // Attempt to delete the product by its ID
-        if (productRepository.existsById(id)) {
-            try {
-                productRepository.deleteById(id);
-                return true; // Deletion was successful
-            } catch (Exception e) {
-                // Handle any exception that might occur during deletion (e.g., database errors)
-                return false; // Deletion failed
-            }
+        try {
+            productRepository.deleteById(id);
+            return true; // Deletion successful
+        } catch (EmptyResultDataAccessException ex) {
+            return false; // Deletion failed
         }
-        return false; // Product with the given ID doesn't exist
 
     }
 }

@@ -1,10 +1,8 @@
 package com.ldb.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ldb.backend.service.ProductService;
@@ -70,10 +68,17 @@ public class ProductController {
     // DELETE a product by ID
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-        if (productService.deleteProduct(productId)) { 
-            return ResponseEntity.noContent().build();
+        Product deleteProduct = productService.getProductById(productId);
+
+        if (deleteProduct == null) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+
+        if (productService.deleteProduct(productId)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.internalServerError().build();
+        } 
     }
 
 }
