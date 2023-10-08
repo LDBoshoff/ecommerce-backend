@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.ldb.backend.model.Product;
 import com.ldb.backend.repository.ProductRepository;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -13,17 +12,19 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
-    }
-
-    public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+    // Get a single product - @GetMapping("/{productId}")
+    public Product getProductById(Long id) {
+        return productRepository.findById(id).orElse(null);
     }
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
+
+    public Product createProduct(Product product) {
+        return productRepository.save(product);
+    }
+
 
     public Product updateProduct(Long productId, Product updatedProduct) {
         // Check if the product with the given ID exists in the database
@@ -34,7 +35,7 @@ public class ProductService {
             existingProduct.setName(updatedProduct.getName());
             existingProduct.setDescription(updatedProduct.getDescription());
             existingProduct.setPrice(updatedProduct.getPrice());
-            existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+            existingProduct.setQuantity(updatedProduct.getQuantity());
 
             // Save the updated product to the database
             return productRepository.save(existingProduct);

@@ -25,17 +25,17 @@ public class Product {
     private double price;
     
     @Column(nullable = false)  // Define 'stockQuantity' attribute for product stock quantity, not nullable
-    private int stockQuantity;
+    private int quantity;
 
     protected Product() {
         // Default constructor
     }
 
-    public Product(String name, String description, double price, int stockQuantity) {
+    public Product(String name, String description, double price, int quantity) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.stockQuantity = stockQuantity;
+        this.quantity = quantity;
     }
 
     public Long getId() {
@@ -70,11 +70,22 @@ public class Product {
         this.price = price;
     }
 
-    public int getStockQuantity() {
-        return stockQuantity;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                '}';
     }
 }

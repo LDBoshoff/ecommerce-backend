@@ -4,12 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ldb.backend.service.ProductService;
 import com.ldb.backend.model.Product;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/products")
@@ -28,16 +31,26 @@ public class ProductController {
     // GET a single product by ID
     @GetMapping("/{productId}")
     public ResponseEntity<Product> getProductById(@PathVariable Long productId) {
-        Optional<Product> product = productService.getProductById(productId);
-        return product.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Product product = productService.getProductById(productId);
+
+        if (product != null) {
+            return ResponseEntity.ok(product);
+        } else {
+            // Return a 404 Not Found response if the product is not found
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // CREATE a new product
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> createProduct(@RequestBody Product product, UriComponentsBuilder ucb) {
         Product createdProduct = productService.createProduct(product);
-        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
+
+        URI locationOfNewProduct = ucb
+                .path("api/products/{id}")
+                .buildAndExpand(createdProduct.getId())
+                .toUri();
+        
+        return ResponseEntity.created(locationOfNewProduct).body(createdProduct);
     }
 
     // UPDATE an existing product
@@ -54,6 +67,18 @@ public class ProductController {
         }
     }
 
+       // @PutMapping("/{requestedId}")
+    // private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
+    //     CashCard cashCard = findCashCard(requestedId, principal);
+    //     if (cashCard != null) {
+    //         CashCard updatedCashCard = new CashCard(requestedId, cashCardUpdate.amount(), principal.getName());
+    //         cashCardRepository.save(updatedCashCard);
+    //         return ResponseEntity.noContent().build();
+    //     }
+    //     return ResponseEntity.notFound().build();
+    // }
+
+
     // DELETE a product by ID
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
@@ -62,4 +87,5 @@ public class ProductController {
         }
         return ResponseEntity.notFound().build();
     }
+
 }
