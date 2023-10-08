@@ -46,7 +46,7 @@ public class ProductController {
         Product createdProduct = productService.createProduct(product);
 
         URI locationOfNewProduct = ucb
-                .path("api/products/{id}")
+                .path("api/products/{productId}")
                 .buildAndExpand(createdProduct.getId())
                 .toUri();
         
@@ -59,25 +59,13 @@ public class ProductController {
         Product updated = productService.updateProduct(productId, updatedProduct);
 
         if (updated != null) {
-            // Product was updated successfully
-            return ResponseEntity.ok(updated);
+            // Product was updated successfully 
+            return ResponseEntity.noContent().build();
         } else {
             // Product with the specified ID doesn't exist
             return ResponseEntity.notFound().build();
         }
     }
-
-       // @PutMapping("/{requestedId}")
-    // private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
-    //     CashCard cashCard = findCashCard(requestedId, principal);
-    //     if (cashCard != null) {
-    //         CashCard updatedCashCard = new CashCard(requestedId, cashCardUpdate.amount(), principal.getName());
-    //         cashCardRepository.save(updatedCashCard);
-    //         return ResponseEntity.noContent().build();
-    //     }
-    //     return ResponseEntity.notFound().build();
-    // }
-
 
     // DELETE a product by ID
     @DeleteMapping("/{productId}")
