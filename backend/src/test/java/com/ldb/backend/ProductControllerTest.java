@@ -19,7 +19,7 @@ public class ProductControllerTest {
 
     @Test
     public void testGetProductById() {
-        // Product 1 = (1, 'Iphone', 'Latest model of the popular smartphone', 899.99, 30)
+        // Product 1 = (1, 'Iphone', 'Latest model of the popular smartphone', 999.99, 50)
         // Verify the status code for product 1
         ResponseEntity<Product> response1 = restTemplate.getForEntity("/api/products/1", Product.class);
         assertEquals(HttpStatus.OK, response1.getStatusCode());
@@ -30,8 +30,8 @@ public class ProductControllerTest {
         assertEquals(1L, product1.getId());
         assertEquals("Iphone", product1.getName());
         assertEquals("Latest model of the popular smartphone", product1.getDescription());
-        assertEquals(899.99, product1.getPrice());
-        assertEquals(30, product1.getQuantity());
+        assertEquals(999.99, product1.getPrice());
+        assertEquals(50, product1.getQuantity());
 
         // Product 4 = (4, 'Playstation 5', 'Next-gen gaming console with 4K graphics support', 499.99, 40)
         // Verify the status code for product 4
