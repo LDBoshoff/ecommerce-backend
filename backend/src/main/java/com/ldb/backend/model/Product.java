@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 
@@ -26,6 +28,11 @@ public class Product {
     
     @Column(nullable = false)  // Define 'stockQuantity' attribute for product stock quantity, not nullable
     private int quantity;
+
+    // Add a reference to the owning Store
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false) // Define the foreign key column
+    private Store store;
 
     protected Product() {
         // Default constructor
@@ -76,6 +83,14 @@ public class Product {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public Store getStore() {
+        return store;
+    }
+
+    public void setStore(Store store) {
+        this.store = store;
     }
 
     @Override

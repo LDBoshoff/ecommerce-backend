@@ -87,11 +87,11 @@ public class User {
         this.lastname = lastname;
     }
 
-    // public List<Store> getStores() {
-    //     return stores;
-    // }
+    public List<Store> getStores() {
+        return stores;
+    }
 
-    // public void setStores(List<Store> stores) {
-    //     this.stores = stores;
-    // }
+    public void setStores(List<Store> stores) {
+        this.stores = stores;
+    }
 }
