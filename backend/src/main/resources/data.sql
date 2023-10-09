@@ -1,7 +1,4 @@
--- INSERT INTO products (name, description, price, quantity) VALUES ('Iphone', 'Latest model of the popular smartphone', 999.99, 50);
--- INSERT INTO products (name, description, price, quantity) VALUES ('Samsung Smart TV', '55-inch 4K UHD Smart TV with built-in streaming apps', 699.99, 30);
--- INSERT INTO products (name, description, price, quantity) VALUES ('Asus Laptop', 'Powerful laptop with Intel Core i7 processor and 16GB RAM', 899.99, 20);
--- INSERT INTO products (name, description, price, quantity) VALUES ('Playstation 5', 'Next-gen gaming console with 4K graphics support', 499.99, 40);
+-- Product Data
 
 -- Insert 'Iphone' if it doesn't exist
 INSERT INTO products (name, description, price, quantity)
@@ -30,3 +27,17 @@ SELECT 'Playstation 5', 'Next-gen gaming console with 4K graphics support', 499.
 WHERE NOT EXISTS (
     SELECT 1 FROM products WHERE name = 'Playstation 5'
 );
+
+
+INSERT INTO users (email, password, firstname, lastname)
+VALUES
+    ('john.doe@example.com', 'password1', 'John', 'Doe'),
+    ('alice.smith@example.com', 'password2', 'Alice', 'Smith')
+ON DUPLICATE KEY UPDATE email = VALUES(email);
+
+INSERT INTO stores (name, user_id)
+VALUES
+    ('Store A', 1),
+    ('Store B', 1),
+    ('Store C', 2)
+ON DUPLICATE KEY UPDATE name = VALUES(name), user_id = VALUES(user_id);
