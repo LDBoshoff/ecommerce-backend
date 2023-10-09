@@ -29,7 +29,7 @@ public class Product {
     @Column(nullable = false)  // Define 'stockQuantity' attribute for product stock quantity, not nullable
     private int quantity;
 
-    // Add a reference to the owning Store
+    // @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "store_id", nullable = false) // Define the foreign key column
     private Store store;
