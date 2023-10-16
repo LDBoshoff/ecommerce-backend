@@ -14,33 +14,47 @@ import java.util.function.Function;
 @Component
 public class JwtUtil { 
 
-    // // To be sent in the response header after successfull login: 
-    // // HTTP/1.1 200 OK
-    // // Content-Type: application/json
-    // // Authorization: Bearer <JWT-Token>
+    /*
+     * JWT Creation Process:
+     * Step 1 - Header Creation (type and alg)
+     * Step 2 - Payload Creation (claims)
+     * Step 3 - Encoding (Base64Url-encode the header and the payload separately to create two segments)
+     * Step 4 - Signature Creation (combine header, payload and secret key)
+     * Step 5 - JWT assembly
+     * Step 6 - Final JWT
+     * Example: 
+     *      Header: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9
+            Payload: eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJuYW1lIjogIkpvaG4gRG9lIiwgImlhdCI6IDE1MTYyMzkwMjJ9
+            Signature: QYwZgQOymO4tF7Zl_3eibnJ7rbbHjfWW9-_PnvkvDyQ
+            JWT: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJuYW1lIjogIkpvaG4gRG9lIiwgImlhdCI6IDE1MTYyMzkwMjJ9.QYwZgQOymO4tF7Zl_3eibnJ7rbbHjfWW9-_PnvkvDyQ
+     */
 
-    // // On the client side, the JWT can be extracted from the "Authorization" header and stored securely (e.g., in an HTTP-only cookie or local storage) 
-    // // for subsequent requests to protected endpoints. The client includes the token in the "Authorization" header for authentication when accessing those protected resources.
-    // public String generateToken(Long userId) { 
-    //     // Map<String, Object> claims = new HashMap<>(); 
-    //     // return createToken(claims, userName); 
+    // {
+    //     "typ": "JWT",
+    //     "alg": "HS256"
+    // }
 
-    //     return createToken(userId); // add claims later
-    // } 
-  
-    // // userId used for JWT 
-    // // Example :
-    // // {
-    // //      "sub": "1",
-    // //      "iat": 1634101203,       // Example timestamp for the issued at claim
-    // //      "exp": 1634104803        // Example timestamp for the expiration claim (1 hour later)
-    // // }
+    // {
+    //     "sub": "123",
+    //     "iat": 1697448625,
+    //     "exp": 1697450425
+    // }
+
+    // HMACSHA256(
+    //     base64UrlEncode(header) + "." +
+    //     base64UrlEncode(payload),
+        
+    //     your-256-bit-secret
+
+    // )
+      
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437"; 
   
     public String createToken(long userId) { 
         String userIdString = String.valueOf(userId); // Cast to string
 
         return Jwts.builder() 
+                .setHeaderParam("typ","JWT")
                 // .setClaims(claims) 
                 .setSubject(userIdString) 
                 .setIssuedAt(new Date(System.currentTimeMillis())) 
@@ -80,15 +94,14 @@ public class JwtUtil {
     } 
   
     public boolean isTokenValid(String token) {
-        Date expirationDate = extractExpirationDate(token);
-    
-        if (expirationDate != null) {
+        try {
+            Date expirationDate = extractExpirationDate(token);
             Date currentDate = new Date(System.currentTimeMillis());
-            return currentDate.before(expirationDate); // Token is valid if current date is after the expiration date
-        }
-    
-        // If there is no expiration date, you may choose to return true or false based on your requirements
-        return false;
+
+            return (expirationDate != null && currentDate.before(expirationDate));
+        } catch (Exception e) {
+            return false;
+        } 
     }
   
     // users need include their userId along with the JWT token - eiher as request parameter, or custom header or body
