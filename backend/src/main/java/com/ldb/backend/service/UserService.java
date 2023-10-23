@@ -1,95 +1,58 @@
 package com.ldb.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ldb.backend.model.User;
 import com.ldb.backend.repository.UserRepository;
 
 @Service
-public class UserService {
-    
+public class UserService implements UserDetailsService {
+
     @Autowired
     private UserRepository userRepository;
 
-    // @Autowired
-    // private PasswordEncoder passwordEncoder;
+    // private BCryptPasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User with email " + email + " not found.");
+        }
+        
+        UserDetails userDetails = user;
+        
+        return userDetails;
+    }
+
+    // Password is hashed before calling createUser
+    public User createUser(User saveUser) {
+        // saveUser.setPassword(passwordEncoder.encode(saveUser.getPassword())); // Hash the password before saving
+        return userRepository.save(saveUser);
+    }
 
     // retrieves user via id or else return null if not found
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
-    // saves a user to the database
-    public User createUser(User saveUser) {
-        return userRepository.save(saveUser);
+    public String getEmailById(Long userId) {
+        return userRepository.findEmailById(userId).orElse(null);
     }
-    
-    // checks if an email already exists or not
-    public boolean uniqueEmail(String email) { 
-        if (userRepository.existsByEmail(email)){
-            return false;
-        }
-        
-        return true;
+
+    // If a existsByEmail equals true the email is not unique
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     // retrieves a user by their email address
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
-
-    // attempts to register a new user
-    public boolean registeredUser(User registrationUser) {
-        
-        if (!uniqueEmail(registrationUser.getEmail())) {
-            return false;
-        }
-
-        User createUser = new User();
-
-        createUser.setEmail(registrationUser.getEmail());
-        createUser.setPassword(registrationUser.getPassword());
-        createUser.setFirstName(registrationUser.getFirstName());
-        createUser.setLastName(registrationUser.getLastName());
-
-        User newUser = createUser(createUser);
-        
-        if (userRepository.existsById(newUser.getId())) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    // attempts to delete a user
-    public boolean deleteUser(Long userId) {
-        try {
-            userRepository.deleteById(userId);
-            return true; // Deletion successful
-        } catch (EmptyResultDataAccessException ex) {
-            return false; // Deletion failed
-        }
-        
-    }
-
-    // updates an existing user
-    public User updateUser(Long userId, User updatedUser) {
-        // Find the user by ID
-        User existingUser = userRepository.findById(userId).orElse(null);
-
-        if (existingUser != null) {
-            
-            existingUser.setEmail(updatedUser.getEmail());
-            existingUser.setPassword(updatedUser.getPassword());
-            existingUser.setFirstName(updatedUser.getFirstName());
-            existingUser.setLastName(updatedUser.getLastName());
-
-            // Save the updated user
-            return userRepository.save(existingUser);
-        }
-
-        return null;
-    }
+    
 }

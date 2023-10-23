@@ -1,19 +1,28 @@
 package com.ldb.backend.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
-
-import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,21 +38,23 @@ public class User {
 
     @Column(nullable = false)
     private String lastname;
-    
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Store> stores;
 
-    // Constructors, getters, setters, and other methods
-
-    // Constructors
     public User() {
     }
 
-    public User(String email, String password, String firstname, String lastname) {
+    public User(String email, String password, String firstname, String lastname, Role role) {
         this.email = email;
         this.password = password;
         this.firstname = firstname;
         this.lastname = lastname;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -87,11 +98,47 @@ public class User {
         this.lastname = lastname;
     }
 
-    public List<Store> getStores() {
-        return stores;
+    public Role getRole() {
+        return role;
     }
 
-    public void setStores(List<Store> stores) {
-        this.stores = stores;
+    public void setRole(Role role) {
+        this.role = role;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // You need to provide the user's roles as GrantedAuthorities
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toString())); 
+        
+        return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // Assuming email is the username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // You can implement custom logic here
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // You can implement custom logic here
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // You can implement custom logic here
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // You can implement custom logic here
+    }
+
 }
+
