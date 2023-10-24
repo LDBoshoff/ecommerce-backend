@@ -15,7 +15,7 @@ public class StoreService {
     private StoreRepository storeRepository;
 
     public List<Store> getStoresByUserId(Long userId) {
-        return storeRepository.findByUserId(userId);
+        return storeRepository.findAllStoresByUserId(userId);
     }
 
     public Store createStore(Store newStore) {
@@ -33,18 +33,5 @@ public class StoreService {
             storeRepository.deleteById(storeId);
         } 
     }
-
-    // public Store updateStore(Store updatedStore) {
-    //     Store store = storeRepository.findById(storeId).orElse(null);
-    
-    //     if (store != null) {
-    //         store.setName(updatedStore.getName());
-
-    //         return storeRepository.save(store);
-    //     } 
-
-    //     return null;
-    // }
-
 
 }

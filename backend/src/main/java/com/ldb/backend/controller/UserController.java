@@ -102,32 +102,5 @@ public class UserController {
         }
     }
 
-
-  /*
-   * Resouce Access:
-        1) The process starts when the user sends a request to the Service. The request is first intercepted by JwtAuthenticationFilter, 
-            which is a custom filter integrated into the SecurityFilterChain.
-        2) As the API is secured, if the JWT is missing, a response with HTTP Status 403 is sent to the user.
-        3) When an existing JWT is received, JwtService is called to extract the userEmail from the JWT. If the userEmail cannot be extracted, 
-            a response with HTTP Status 403 is sent to the user.
-        4) If the userEmail can be extracted, it will be used to query the user’s authentication and authorization information via UserDetailsService.
-        5) If the user’s authentication and authorization information does not exist in the database, a response with HTTP Status 403 is sent to the user.
-        6) If the JWT is expired, a response with HTTP Status 403 is sent to the user.
-        7) Upon successful authentication, the user’s details are encapsulated in a UsernamePasswordAuthenticationToken object 
-            and stored in the SecurityContextHolder.
-        8) The Spring Security Authorization process is automatically invoked.
-        9) The request is dispatched to the controller, and a successful JSON response is returned to the user.
-
-    1. SecurityFilterChain: a filter chain which is capable of being matched against an HttpServletRequest. in order to decide whether it applies to that request.
-    2. SecurityContextHolder: is where Spring Security stores the details of who is authenticated. Spring Security uses that information for authorization.
-    3. UserDetailsService: Service to fetch user-specific data.
-    4. Authorization Architecture
-   */
-
-
-    
-    
-
-
 }
 
