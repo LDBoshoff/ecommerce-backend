@@ -54,9 +54,12 @@ public class ProductController {
         if (product == null) {
             return ResponseEntity.notFound().build();
         }
-
         
-        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {    // Prevents the principal from accessing their product which belongs their different store than the current one in pathvariable
+        // if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {  
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // }
+
+         if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (!isProductStoreMatching(product, storeId))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -98,7 +101,11 @@ public class ProductController {
             return ResponseEntity.notFound().build(); // refactor status code to prevent data leak
         }
         
-        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {               // ensure principal is authorized to access this product of specific store
+        // if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {        
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // }
+       
+        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (!isProductStoreMatching(product, storeId))) {       
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -115,7 +122,7 @@ public class ProductController {
             return ResponseEntity.notFound().build(); // refactor status code to prevent data leak
         }
         
-        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {     // ensure principal is authorized to access this product of specific store
+        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (!isProductStoreMatching(product, storeId))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
