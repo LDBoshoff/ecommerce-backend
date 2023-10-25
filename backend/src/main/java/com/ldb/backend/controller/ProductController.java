@@ -62,7 +62,6 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    // fix error: allows user to create exact duplicate products
     @PostMapping
     public ResponseEntity<String> addProduct(@PathVariable Long storeId, @RequestBody Product product, Principal principal) {
         Store store = storeService.getStoreById(storeId);
@@ -75,9 +74,13 @@ public class ProductController {
         }
 
         // check if products already exists
+        if (productService.productExists(product)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("A product with the same name already exists.");
+        }
 
+        // check if the store in which a new product is to be created belongs to the principal
         if (!authorized(store, principal)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("store that product belongs to not principals store");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized.");
         }
 
         product.setStore(store);
@@ -86,7 +89,7 @@ public class ProductController {
         return ResponseEntity.ok("Product created successfully."); // change http status to CREATED
     }
 
-    // authorization method which verifies product's linked store belongs to principal
+    // authorization method which verifies the store belongs to principal
     private boolean authorized(Store store, Principal principal) {
         String email = principal.getName();
 

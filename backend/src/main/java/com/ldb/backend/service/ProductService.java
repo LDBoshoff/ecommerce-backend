@@ -25,6 +25,10 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public boolean productExists(Product product) {
+        return productRepository.existsByName(product.getName());
+    }
+
     public Product updateProduct(Long id, Product updatedProduct) {
         if (productRepository.existsById(id)) {
             updatedProduct.setId(id);
