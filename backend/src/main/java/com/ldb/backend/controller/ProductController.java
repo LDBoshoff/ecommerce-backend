@@ -46,21 +46,23 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<?> getProductById(@PathVariable Long productId, Principal principal) {
+    public ResponseEntity<?> getProductById(@PathVariable Long storeId, @PathVariable Long productId, Principal principal) {
         Product product = productService.getProductById(productId);
 
         if (product == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // Check if the authenticated user owns the store that the product belongs to
-        if (!authorized(product.getStore(), principal)) {
+        
+        if ((!authorized(product.getStore(), principal)) || // Checks if the authenticated user owns the store that the product belongs to
+            (storeId != (product.getStore().getId()))) {    // Prevents the principal from calling their product which belongs their different store
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         return ResponseEntity.ok(product);
     }
 
+    // fix error: allows user to create exact duplicate products
     @PostMapping
     public ResponseEntity<String> addProduct(@PathVariable Long storeId, @RequestBody Product product, Principal principal) {
         Store store = storeService.getStoreById(storeId);
@@ -72,6 +74,8 @@ public class ProductController {
             return ResponseEntity.badRequest().body("Store name cannot be empty.");
         }
 
+        // check if products already exists
+
         if (!authorized(store, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("store that product belongs to not principals store");
         }
@@ -79,15 +83,15 @@ public class ProductController {
         product.setStore(store);
         productService.createProduct(product);
 
-        return ResponseEntity.ok("Product created successfull.");
+        return ResponseEntity.ok("Product created successfully."); // change http status to CREATED
     }
 
+    // authorization method which verifies product's linked store belongs to principal
     private boolean authorized(Store store, Principal principal) {
         String email = principal.getName();
 
         return store.getUser().getEmail().equals(email);
     }
 
-    //private method that verifies store of products belongs to principal
 
 }

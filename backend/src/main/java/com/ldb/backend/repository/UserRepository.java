@@ -10,6 +10,7 @@ import com.ldb.backend.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     
+    // refactor
     public boolean existsByEmail(String email);
     public Optional<User> findByEmail(String email);
     
