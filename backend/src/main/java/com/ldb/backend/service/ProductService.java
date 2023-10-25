@@ -25,8 +25,12 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public boolean productExists(Product product) {
+    public boolean existsByName(Product product) {
         return productRepository.existsByName(product.getName());
+    }
+
+    public boolean existsById(Product product) {
+        return productRepository.existsById(product.getId());
     }
 
     public Product updateProduct(Long id, Product updatedProduct) {

@@ -34,7 +34,7 @@ public class ProductController {
     public ResponseEntity<?> getProducts(@PathVariable Long storeId, Principal principal) {
         Store store = storeService.getStoreById(storeId);
         // check if store == null, return error if so
-        if (!authorized(store, principal)) {
+        if (!storeBelongsToPrincipal(store, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("store that product belongs to not principals store");
         }
 
@@ -56,8 +56,7 @@ public class ProductController {
         }
 
         
-        if ((!authorized(product.getStore(), principal)) || // Checks if the authenticated user owns the store that the product belongs to
-            (storeId != (product.getStore().getId()))) {    // Prevents the principal from accessing their product which belongs their different store than the current one in pathvariable
+        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {    // Prevents the principal from accessing their product which belongs their different store than the current one in pathvariable
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -75,13 +74,13 @@ public class ProductController {
             return ResponseEntity.badRequest().body("Store name cannot be empty.");
         }
 
-        // check if products already exists
-        if (productService.productExists(product)) {
+        // check if product with desired name already exists
+        if (productService.existsByName(product)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("A product with the same name already exists.");
         }
 
         // check if the store in which a new product is to be created belongs to the principal
-        if (!authorized(store, principal)) {
+        if (!storeBelongsToPrincipal(store, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -99,7 +98,7 @@ public class ProductController {
             return ResponseEntity.notFound().build(); // refactor status code to prevent data leak
         }
         
-        if ((!authorized(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {               // ensure principal is authorized to access this product of specific store
+        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {               // ensure principal is authorized to access this product of specific store
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -108,35 +107,38 @@ public class ProductController {
         return ResponseEntity.ok("Product deleted successfully."); 
     }
 
-    // @PutMapping("/{storeId}")
-    // public ResponseEntity<?> updateStore(@PathVariable Long storeId, @RequestBody Store updatedStore, Principal principal) {
-    //     String email = principal.getName(); 
-    //     Store store = storeService.getStoreById(storeId);
+    @PutMapping("/{productId}")
+    public ResponseEntity<?> updateProduct(@PathVariable Long storeId, @PathVariable Long productId, @RequestBody Product updatedProduct, Principal principal) {
+        Product product = productService.getProductById(productId); // get the product
 
-    //     if (store == null) {
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     if (!store.getUser().getEmail().equals(email)) {
-    //         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    //     }
+        if (product == null) {                        // check if product is null or not
+            return ResponseEntity.notFound().build(); // refactor status code to prevent data leak
+        }
         
-    //     if (updatedStore.getName() != null && !updatedStore.getName().trim().isEmpty()) {
-    //         store.setName(updatedStore.getName());
-    //         Store updated = storeService.createStore(store);
-            
-    //         return ResponseEntity.ok(updated);
-    //     } else {
-    //         return ResponseEntity.badRequest().body("Store name cannot be empty.");
-    //     }
-    // }
+        if ((!storeBelongsToPrincipal(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {     // ensure principal is authorized to access this product of specific store
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        // Update the resource's attributes with the new values
+        product.setName(updatedProduct.getName()); // error: name allowed to be empty value
+        product.setDescription(updatedProduct.getDescription());
+        product.setPrice(updatedProduct.getPrice()); // error: prices can be negative
+        product.setQuantity(updatedProduct.getQuantity());
+
+        product = productService.createProduct(product);
+    
+        return ResponseEntity.ok(product);  
+    }
 
     // authorization method which verifies the store belongs to principal
-    private boolean authorized(Store store, Principal principal) {
+    private boolean storeBelongsToPrincipal(Store store, Principal principal) {
         String email = principal.getName();
-
         return store.getUser().getEmail().equals(email);
     }
 
+    // checks if the product id and store id path variables match
+    private boolean isProductStoreMatching(Product product, Long storeId) {
+        return storeId.equals(product.getStore().getId());
+    }
 
 }
