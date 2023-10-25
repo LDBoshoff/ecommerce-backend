@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,7 +57,7 @@ public class ProductController {
 
         
         if ((!authorized(product.getStore(), principal)) || // Checks if the authenticated user owns the store that the product belongs to
-            (storeId != (product.getStore().getId()))) {    // Prevents the principal from calling their product which belongs their different store
+            (storeId != (product.getStore().getId()))) {    // Prevents the principal from accessing their product which belongs their different store than the current one in pathvariable
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -80,7 +82,7 @@ public class ProductController {
 
         // check if the store in which a new product is to be created belongs to the principal
         if (!authorized(store, principal)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         product.setStore(store);
@@ -88,6 +90,46 @@ public class ProductController {
 
         return ResponseEntity.ok("Product created successfully."); // change http status to CREATED
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long storeId, @PathVariable Long productId, Principal principal) {
+        Product product = productService.getProductById(productId); // get the product
+
+        if (product == null) {                        // check if product is null or not
+            return ResponseEntity.notFound().build(); // refactor status code to prevent data leak
+        }
+        
+        if ((!authorized(product.getStore(), principal)) || (storeId != (product.getStore().getId()))) {               // ensure principal is authorized to access this product of specific store
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        productService.deleteProductById(productId); // If the user owns the store, delete the product
+
+        return ResponseEntity.ok("Product deleted successfully."); 
+    }
+
+    // @PutMapping("/{storeId}")
+    // public ResponseEntity<?> updateStore(@PathVariable Long storeId, @RequestBody Store updatedStore, Principal principal) {
+    //     String email = principal.getName(); 
+    //     Store store = storeService.getStoreById(storeId);
+
+    //     if (store == null) {
+    //         return ResponseEntity.notFound().build();
+    //     }
+
+    //     if (!store.getUser().getEmail().equals(email)) {
+    //         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    //     }
+        
+    //     if (updatedStore.getName() != null && !updatedStore.getName().trim().isEmpty()) {
+    //         store.setName(updatedStore.getName());
+    //         Store updated = storeService.createStore(store);
+            
+    //         return ResponseEntity.ok(updated);
+    //     } else {
+    //         return ResponseEntity.badRequest().body("Store name cannot be empty.");
+    //     }
+    // }
 
     // authorization method which verifies the store belongs to principal
     private boolean authorized(Store store, Principal principal) {
